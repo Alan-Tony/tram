@@ -26,12 +26,39 @@ def get_options():
 
 # contains TraCI control loop
 def run():
+
+    #Setting maximum and minimum phase durations
+    max_dur= 120
+    min_dur= 30
+    
+    tlsID = traci.trafficlight.getIDList()
+
+    # Preparing phase for logic0
+    phases = [
+        traci.trafficlight.Phase(duration=min_dur, state= "GGGGrrrrrrrrrrrr", minDur=min_dur, maxDur=max_dur),
+        traci.trafficlight.Phase(duration=min_dur, state= "yyyyrrrrrrrrrrrr", minDur=min_dur, maxDur=max_dur),
+        traci.trafficlight.Phase(duration=min_dur, state= "rrrrGGGGrrrrrrrr", minDur=min_dur, maxDur=max_dur),
+        traci.trafficlight.Phase(duration=min_dur, state= "rrrryyyyrrrrrrrr", minDur=min_dur, maxDur=max_dur),
+        traci.trafficlight.Phase(duration=min_dur, state= "rrrrrrrrGGGGrrrr", minDur=min_dur, maxDur=max_dur),
+        traci.trafficlight.Phase(duration=min_dur, state= "rrrrrrrryyyyrrrr", minDur=min_dur, maxDur=max_dur),
+        traci.trafficlight.Phase(duration=min_dur, state= "rrrrrrrrrrrrGGGG", minDur=min_dur, maxDur=max_dur),
+        traci.trafficlight.Phase(duration=min_dur, state= "rrrrrrrrrrrryyyy", minDur=min_dur, maxDur=max_dur)
+    ]
+
+    """
+    Note on tl logic types:
+    type:	enum (static, actuated, delay_based);	The type of the traffic light (fixed phase durations, 
+    phase prolongation based on time gaps between vehicles (actuated), or on accumulated time loss of queued vehicles (delay_based) )
+    """
+    # Create new program logic for the traffic light
+    traci.trafficlight.setProgramLogic(tlsID[0], traci.trafficlight.Logic(
+        programID="0", type=0, currentPhaseIndex=0, phases=phases
+    ))
+    
     step = 0
     while traci.simulation.getMinExpectedNumber() > 0:
-        traci.simulationStep()
-        
-        #Do something
 
+        traci.simulationStep()
         step += 1
 
     traci.close()
