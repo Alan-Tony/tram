@@ -1,1 +1,6 @@
 .vscode/
+
+# Trips files
+*.trips.xml
+# Edge files
+e*_*.xml
