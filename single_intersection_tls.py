@@ -42,23 +42,6 @@ def run():
     type:	enum (static, actuated, delay_based);	The type of the traffic light (fixed phase durations, 
     phase prolongation based on time gaps between vehicles (actuated), or on accumulated time loss of queued vehicles (delay_based) )
     """
-
-    # Preparing phase for logic0
-    phases = [
-        traci.trafficlight.Phase(duration=default_dur, state= "GGGGrrrrrrrrrrrr", minDur=min_dur, maxDur=max_dur),
-        traci.trafficlight.Phase(duration=yellow_dur, state= "yyyyrrrrrrrrrrrr", minDur=yellow_dur, maxDur=yellow_dur),
-        traci.trafficlight.Phase(duration=default_dur, state= "rrrrGGGGrrrrrrrr", minDur=min_dur, maxDur=max_dur),
-        traci.trafficlight.Phase(duration=yellow_dur, state= "rrrryyyyrrrrrrrr", minDur=yellow_dur, maxDur=yellow_dur),
-        traci.trafficlight.Phase(duration=default_dur, state= "rrrrrrrrGGGGrrrr", minDur=min_dur, maxDur=max_dur),
-        traci.trafficlight.Phase(duration=yellow_dur, state= "rrrrrrrryyyyrrrr", minDur=yellow_dur, maxDur=yellow_dur),
-        traci.trafficlight.Phase(duration=default_dur, state= "rrrrrrrrrrrrGGGG", minDur=min_dur, maxDur=max_dur),
-        traci.trafficlight.Phase(duration=yellow_dur, state= "rrrrrrrrrrrryyyy", minDur=yellow_dur, maxDur=yellow_dur)
-    ]
-
-    # Create new program logic for the traffic light
-    traci.trafficlight.setProgramLogic(tlsIDs[0], traci.trafficlight.Logic(
-        programID="0", type=0, currentPhaseIndex=0, phases=phases
-    ))
     
     priorities = np.zeros(4, int)
     nextYellow = False                      # Used to transition to yellow phase
