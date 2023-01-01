@@ -351,10 +351,14 @@
     </edge>
 
     <tlLogic id="B1" type="static" programID="0" offset="0">
-        <phase duration="42" state="GGggrrrrGGggrrrr"/>
-        <phase duration="3"  state="yyyyrrrryyyyrrrr"/>
-        <phase duration="42" state="rrrrGGggrrrrGGgg"/>
-        <phase duration="3"  state="rrrryyyyrrrryyyy"/>
+        <phase duration="60" state="GGGGrrrrrrrrrrrr" minDur="30" maxDur="120"/>
+        <phase duration="3"  state="yyyyrrrrrrrrrrrr"/>
+        <phase duration="60" state="rrrrGGGGrrrrrrrr" minDur="30" maxDur="120"/>
+        <phase duration="3"  state="rrrryyyyrrrrrrrr"/>
+        <phase duration="60" state="rrrrrrrrGGGGrrrr" minDur="30" maxDur="120"/>
+        <phase duration="3"  state="rrrrrrrryyyyrrrr"/>
+        <phase duration="60" state="rrrrrrrrrrrrGGGG" minDur="30" maxDur="120"/>
+        <phase duration="3"  state="rrrrrrrrrrrryyyy"/>
     </tlLogic>
 
     <junction id="A0" type="priority" x="0.00" y="0.00" incLanes="B0A0_0 A1A0_0" intLanes=":A0_0_0 :A0_1_0" shape="3.20,-3.20 3.20,3.20 -3.20,3.20 -2.49,-0.36 -1.60,-1.60 -0.36,-2.49 1.24,-3.02">

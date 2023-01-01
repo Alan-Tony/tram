@@ -12,10 +12,8 @@ Optimizing traffic lights to increase traffic throughput in urban areas
 ## SUMO information
 
 * Phase state format:
-..2. G : Green (go)
-..3. y : Yello (go slow)
-..4. r : Red (stop)
-..5. g : Green (go, minor conflict)
+    rugGyYuoO, for red, red-yellow, green, yellow, off, where lower case letters mean that the stream has
+    to decelerate.
 
 * South -> East -> North -> West
 
