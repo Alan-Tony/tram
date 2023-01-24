@@ -4,6 +4,10 @@ import os
 import sys
 import optparse
 import numpy as np
+from xml.sax import make_parser
+sys.path.insert(0, '/usr/share/sumo/tools/output')
+import statisticsElements
+import utils
 
 # we need to import some python modules from the $SUMO_HOME/tools directory
 if 'SUMO_HOME' in os.environ:
@@ -49,7 +53,17 @@ def run():
     starve_count = np.zeros(4, float)
     deltaT = traci.simulation.getDeltaT()    # Gets length of a simulation step
     timer = 0
+
+    detectors = traci.lanearea.getIDList()
+    d0 = detectors[0]
+    step_count = 0
+    print("Step\tJamLength\tMeanSpead\tOccupancy")
     while traci.simulation.getMinExpectedNumber() > 0:
+
+        print(step_count, traci.lanearea.getJamLengthVehicle(d0), 
+            traci.lanearea.getLastStepMeanSpeed(d0), 
+            traci.lanearea.getLastStepOccupancy(d0), 
+            sep='\t')
 
         if(timer - deltaT < 0):
 
@@ -63,7 +77,7 @@ def run():
                 nextYellow = False
 
             else:
-            
+                
                 # Assign priority to each lane
                 priorities =  np.ndarray.astype(starve_count - np.min(starve_count), int)    # For now most starved lanes have highest priority
 
@@ -88,6 +102,7 @@ def run():
                 nextYellow = True
 
         traci.simulationStep()
+        step_count += 1
         timer -= deltaT
         starve_count +=  deltaT
         curr_lane = traci.trafficlight.getPhase(tlsIDs[0]) // 2
@@ -100,7 +115,7 @@ def run():
 # main entry point
 if __name__ == "__main__":
     options = get_options()
-
+    
     # check binary
     if options.nogui:
         sumoBinary = checkBinary('sumo')
@@ -111,3 +126,44 @@ if __name__ == "__main__":
     traci.start([sumoBinary, "-c", "single_intersection_tls.sumo.cfg",
                              "--tripinfo-output", "single_intersection_tls.trips.xml"])
     run()
+
+    # Calculating trip statistics
+    parser = make_parser()
+
+    allvehicles = {}
+    vehfile = "single_intersection_tls.trips.xml"
+    for filename in vehfile.split(","):
+        allvehicles[filename] = []
+        parser.setContentHandler(statisticsElements.VehInformationReader(allvehicles[filename]))
+        parser.parse(filename)
+
+    assignments = {}
+    # calculate/read the basic statistics
+    for method, vehicles in allvehicles.items():
+        utils.getBasicStats(False, method, vehicles, assignments)
+
+    print(
+        'average vehicular travel time(s) = the sum of all vehicular travel times / the number of vehicles\n')
+    print(
+        'average vehicular travel length(m) = the sum of all vehicular travel lengths / the number of vehicles\n')
+    print(
+        'average vehicular travel speed(m/s) = the sum of all vehicular travel speeds / the number of vehicles\n')
+    for method in assignments.values():
+        print('\nAssignment Method:%s\n' % method.label)
+        print('- total number of vehicles:%s\n' % method.totalVeh)
+        print('- total departure delay(s):%s, ' %
+                      method.totalDepartDelay)
+        print('- average departure delay(s):%s\n' %
+                      method.avgDepartDelay)
+        print('- total waiting time(s):%s, ' % method.totalWaitTime)
+        print('- average vehicular waiting time(s):%s\n' %
+                      method.avgWaitTime)
+        print('- total travel time(s):%s, ' % method.totalTravelTime)
+        print('- average vehicular travel time(s):%s\n' %
+                      method.avgTravelTime)
+        print('- total travel length(m):%s, ' %
+                      method.totalTravelLength)
+        print('- average vehicular travel length(m):%s\n' %
+                      method.avgTravelLength)
+        print('- average vehicular travel speed(m/s):%s\n' %
+                      method.avgTravelSpeed)
