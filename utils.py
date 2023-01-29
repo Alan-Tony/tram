@@ -1,8 +1,15 @@
 import sys
 sys.path.insert(0, '/usr/share/sumo/tools/output')
-from statisticsElements import Assign
+from statisticsElements import Assign, VehInformationReader
+from xml.sax import make_parser
 
-def getBasicStats(verbose, method, vehicles, assignments):
+def getBasicStats(method):
+
+    vehicles = []
+    parser = make_parser()
+    parser.setContentHandler(VehInformationReader(vehicles))
+    parser.parse(method)
+
     totalVeh = 0.
     totalTravelTime = 0.
     totalTravelLength = 0.
@@ -24,8 +31,6 @@ def getBasicStats(verbose, method, vehicles, assignments):
         totalWaitTime += veh.waittime
         totalTravelSpeed += veh.speed
         totalDepartDelay += veh.departdelay
-    if verbose:
-        print('totalVeh:', totalVeh)
 
     totalVehDivisor = max(1, totalVeh)  # avoid division by 0
     avgTravelTime = totalTravelTime / totalVehDivisor
@@ -45,7 +50,7 @@ def getBasicStats(verbose, method, vehicles, assignments):
     SDSpeed = (totalDiffSpeed / totalVehDivisor)**(0.5)
     SDWaitTime = (totalDiffWaitTime / totalVehDivisor)**(0.5)
 
-    assignments[method] = Assign(method, totalVeh, totalTravelTime, totalTravelLength,
+    return Assign(method, totalVeh, totalTravelTime, totalTravelLength,
                                  totalDepartDelay, totalWaitTime, avgTravelTime,
                                  avgTravelLength, avgTravelSpeed, avgDepartDelay,
                                  avgWaitTime, SDTravelTime, SDLength, SDSpeed, SDWaitTime)
