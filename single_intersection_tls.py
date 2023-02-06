@@ -152,4 +152,5 @@ if __name__ == "__main__":
             ]], columns=df_columns)
         ], ignore_index=True)
 
-    print(df[['TotalWaitingTime', 'TotalTravelTime', 'AverageTravelSpeed']])
+    df.insert(0, 'PriorityMode', ['Starvation Time', 'Queue Length', 'Lane Occupance', 'Lane Speed', 'Speed & Occupance', 'Speed & Length'])
+    print(df[['PriorityMode', 'TotalWaitingTime', 'TotalTravelTime', 'AverageTravelSpeed']])
