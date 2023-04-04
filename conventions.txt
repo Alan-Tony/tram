@@ -1,0 +1,10 @@
+
+
+Phase details
+
+1. vertical (_0)
+2. horizontal cross (_1)
+3. horizontal straight (_0)
+
+straight is on the right lane (so _0)
+cross (right turn) is on the left lane (so _1)
