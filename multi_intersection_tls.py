@@ -34,8 +34,12 @@ def run(priority_mode = 0):
     default_dur = 60
     max_dur = 120
     min_dur = 30
-    yellow_dur = 30
+    yellow_dur = 3
     starve_thresh = 180
+
+    # Stats
+    total_queue_length = 0.0
+    avg_queue_length  = 0.0   # Per second
     
     tlsIDs = traci.trafficlight.getIDList()
     # Information of each traffic light
@@ -60,6 +64,14 @@ def run(priority_mode = 0):
         for i, tlsID in enumerate(tlsIDs):
 
             lanes = controlled_lanes[tlsID]
+
+            # Getting lane stats
+            jam_lengths = np.array(list(map(
+                lambda x : traci.lanearea.getJamLengthVehicle('e2det_' + lanes[x]), 
+                range(len(lanes))
+            )))
+
+            total_queue_length += np.sum(jam_lengths)
         
             if(timers[i] - deltaT < 0):
 
@@ -74,12 +86,6 @@ def run(priority_mode = 0):
                     nextYellow[i] = False
 
                 else:
-                    
-                    # Getting lane stats
-                    jam_lengths = np.array(list(map(
-                        lambda x : traci.lanearea.getJamLengthVehicle('e2det_' + lanes[x]), 
-                        range(len(lanes))
-                    )))
 
                     lane_occupance = np.array(list(map(
                         lambda x : traci.lanearea.getLastStepOccupancy('e2det_' + lanes[x]), 
@@ -131,12 +137,15 @@ def run(priority_mode = 0):
             starve_count[i][(curr_phase[i] // 2) * 2] -= deltaT
             starve_count[i][(curr_phase[i] // 2) * 2 + 1] -= deltaT
 
-        traci.simulationStep()
         step_count += 1
+        avg_queue_length = total_queue_length / (step_count * deltaT)
+        traci.simulationStep()
         timers -= deltaT    # Subtract step time from all tls timers
 
     traci.close()
     sys.stdout.flush()
+
+    return avg_queue_length
 
 
 # main entry point
@@ -149,7 +158,7 @@ if __name__ == "__main__":
     else:
         sumoBinary = checkBinary('sumo-gui')
 
-    df_columns=['VehicleCount', 'TotalDepartureDelay', 'TotalWaitingTime', 'TotalTravelTime', 'TotalTravelLength',
+    df_columns=['VehicleCount', 'AverageQueueLength', 'TotalDepartureDelay', 'TotalWaitingTime', 'TotalTravelTime', 'TotalTravelLength',
     'AverageDepartureDelay', 'AverageWaitingTime', 'AverageTravelTime', 'AverageTravelLength', 'AverageTravelSpeed']
     df = pd.DataFrame(columns=df_columns)
 
@@ -158,17 +167,18 @@ if __name__ == "__main__":
         # traci starts sumo as a subprocess and then this script connects and runs
         traci.start([sumoBinary, "-c", "exp.sumocfg",
                                 "--tripinfo-output", "exp.trips.xml"])
-        run(priority_mode)
+        
+        avg_queue_length = run(priority_mode)
 
         # Calculating trip statistics
         stats = utils.getBasicStats("exp.trips.xml")
         df = pd.concat([
             df, pd.DataFrame(data=[[
-                stats.totalVeh, stats.totalDepartDelay, 
+                stats.totalVeh, avg_queue_length, stats.totalDepartDelay, 
                 stats.totalWaitTime, stats.totalTravelTime, stats.totalTravelLength, stats.avgDepartDelay, 
                 stats.avgWaitTime, stats.avgTravelTime, stats.avgTravelLength, stats.avgTravelSpeed
             ]], columns=df_columns)
         ], ignore_index=True)
 
     df.insert(0, 'PriorityMode', ['Starvation Time', 'Queue Length', 'Lane Occupance', 'Lane Speed', 'Speed & Occupance', 'Speed & Length'])
-    print(df[['PriorityMode', 'AverageWaitingTime', 'TotalWaitingTime', 'TotalTravelTime', 'AverageTravelSpeed']])
+    print(df[['PriorityMode', 'AverageQueueLength', 'AverageWaitingTime', 'TotalWaitingTime', 'TotalTravelTime', 'AverageTravelSpeed']])
