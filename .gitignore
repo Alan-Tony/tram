@@ -1,2 +1,9 @@
 .vscode/
 __pycache__/
+
+# Trips files
+*.trips.xml
+# Edge files
+e*_*.xml
+
+e2output.xml

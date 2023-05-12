@@ -1,0 +1,9 @@
+yellow interval = 3s instead of 30s
+
+        PriorityMode  AverageQueueLength  AverageWaitingTime  TotalWaitingTime  TotalTravelTime  AverageTravelSpeed
+0    Starvation Time          533.786921         2654.207868       16522443.98        6690816.0            2.166784
+1       Queue Length          462.323347         1934.821202       12044261.98        4761520.0            2.150102
+2     Lane Occupance          719.330943         3169.009796       19727085.98        8790081.0            1.793452
+3         Lane Speed          531.449155         2548.284816       15863072.98        6197265.0            1.804553
+4  Speed & Occupance          623.819947         2799.992447       17429952.98        7238829.0            1.703778
+5     Speed & Length          610.999363         3218.622808       20035926.98        7805911.0            1.714647
